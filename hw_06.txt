@@ -1,0 +1,44 @@
+ЗАДАНИЕ 2
+
+
+SELECT from_user_id , COUNT(*) AS coun_t FROM messages WHERE from_user_id IN
+(
+SELECT friend_id FROM friendship WHERE user_id = 8 
+UNION 
+SELECT user_id FROM friendship WHERE friend_id = 8)
+GROUP BY from_user_id 
+ORDER BY from_user_id DESC, coun_t  LIMIT 1
+	
+	 
+	 
+ЗАДАНИЕ 3
+
+SELECT SUM(like_count) from
+(SELECT  target_id, COUNT(*) as like_count
+from likes 
+WHERE user_id in (select * from ( SELECT user_id FROM profiles ORDER by birthday DESC LIMIT 10) as r) 
+GROUP by target_id ) AS sum_like ;; 
+
+ЗАДАНИЕ 4
+
+SELECT * FROM
+(SELECT SUM(fm_all_like)
+FROM (SELECT target_id , 
+COUNT(*) AS fm_all_like FROM likes WHERE user_id IN
+  (SELECT user_id 
+   FROM profiles WHERE sex = 'f' 
+   ORDER BY user_id)
+GROUP BY target_id ) AS fm_sum
+UNION
+SELECT SUM(m_all_like)
+FROM (SELECT target_id , 
+COUNT(*) AS m_all_like FROM likes WHERE user_id IN
+  (SELECT user_id 
+   FROM profiles WHERE sex = 'm' 
+   ORDER BY user_id)
+GROUP BY target_id ) AS m_sum
+) as res_all
+
+5 ЗАДАНИЕ
+
+
