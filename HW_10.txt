@@ -1,0 +1,48 @@
+CREATE UNIQUE INDEX profiles_birthday_uq ON profiles(birthday) ;
+
+CREATE UNIQUE INDEX profiles_hometowh_uq ON profiles(hometowh);
+
+CREATE UNIQUE INDEX posts_user_id_uq ON posts(user.id);
+
+CREATE UNIQUE INDEX posts_created_at_uq ON posts(created_at);
+
+CREATE UNIQUE INDEX media_user_id_uq ON media(user.id);
+
+CREATE UNIQUE INDEX users_created_at_uq ON users(created_at);
+
+CREATE UNIQUE INDEX users_email_uq ON users(email);
+
+CREATE UNIQUE INDEX messages_from_user_id_uq ON messages(from_user_id);
+
+CREATE UNIQUE INDEX messages_to_user_id_uq ON messages(to_user_id);
+
+CREATE UNIQUE INDEX likes_user_id_uq ON likes(user_id);
+
+CREATE UNIQUE INDEX likes_target_id_uq ON likes(target_id);
+
+CREATE UNIQUE INDEX likes_created_at_uq ON likes(created_at);
+
+
+
+-- Построить запрос, который будет выводить следующие столбцы:
+-- имя группы
+-- среднее количество пользователей в группах
+-- самый молодой пользователь в группе
+-- самый пожилой пользователь в группе
+-- общее количество пользователей в группе
+-- всего пользователей в системе
+-- отношение в процентах (общее количество пользователей в группе / всего пользователей в системе) * 100
+
+SELECT DISTINCT communities.name , 
+  COUNT(communities_users.user_id) OVER(PARTITION BY communities_users.community_id) AS total_by_group , 
+ -- AVG() OVER(PARTITION BY communities_users.community_id) AS avg_by_group, 
+  MAX(profiles.birthday) OVER(PARTITION BY communities_users.community_id) AS yongest, 
+  MIN(profiles.birthday) OVER(PARTITION BY communities_users.community_id) AS oldest, 
+  MAX(profiles.user_id) OVER() AS total, 
+  COUNT(communities_users.user_id) OVER(PARTITION BY communities_users.community_id) / MAX(profiles.user_id) OVER() * 100 AS "%%" 
+    FROM communities_users 	
+      JOIN communities
+        ON communities.id = communities_users.community_id
+      RIGHT JOIN profiles
+        ON profiles.user_id = communities_users.user_id
+       ;
