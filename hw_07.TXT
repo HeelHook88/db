@@ -1,0 +1,31 @@
+------ задание 1
+
+SELECT user_id 
+FROM users  JOIN orders
+ON users.user_id = orders.user_id
+WHERE orders.status_id = 1
+;  
+
+
+------- Задание 2
+
+SELECT products_name, catalogs_name
+FROM products JOIN catalogs                      
+ON products.prod_id = catalogs.cat_id               
+ORDER BY catalogs_name
+
+;
+
+
+------- Задание 3
+
+
+SELECT id,
+c1.name AS fl_from,
+c2.name AS fl_to
+AS flights fl
+        JOIN cities c1 ON
+        fl.fl_from = c1.label 
+        JOIN cities c2 ON
+        fl.fl_to = c2.label
+;
