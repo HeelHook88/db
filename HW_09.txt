@@ -1,0 +1,99 @@
+-- Транзакции переменные представления 
+-- Задание 1 В базе данных shop и sample присутствуют одни и те же таблицы, учебной базы данных.
+-- Переместите запись id = 1 из таблицы shop.users в таблицу sample.users. Используйте транзакции
+
+START TRANSACTION;
+
+INSERT INTO sample.users SELECT * FROM shop.users 
+WHERE shop.users.id = 1;
+
+COMMIT;
+
+-- Задание 2 Создайте представление, которое выводит название name товарной позиции
+-- из таблицы products и соответствующее название каталога name из таблицы catalogs
+
+CREATE VIEW name_products_catalogs AS SELECT products.name , catalogs.name 
+FROM products , catalogs; 
+
+-- Задание 3 Пусть имеется таблица с календарным полем created_at. 
+-- В ней размещены разряженые календарные записи за август 2018 года '2018-08-01', '2016-08-04', '2018-08-16' и 2018-08-17. 
+-- Составьте запрос, который выводит полный список дат за август, выставляя в соседнем поле значение 1,
+--  если дата присутствует в исходном таблице и 0, если она отсутствует
+
+
+CREATE VIEW created_at_media AS  
+SELECT created_at FROM media 
+WHERE YEAR(created_at) = 2018 and MONTH(created_at) = 8;
+
+SELECT created_at , cnt FROM media
+DECLARE cnt TINYINT ; -- почему то ругаеться и не дает создать переменную 
+BEGIN
+	IF (media.created_at = created_at_media) THEN
+	  cnt = 1 ;
+	ELSE cnt = 0 ;
+END IF;
+END //
+
+
+-- (по желанию) Пусть имеется любая таблица с календарным полем created_at.
+-- Создайте запрос, который удаляет устаревшие записи из таблицы, оставляя только 5 самых свежих записей.
+
+DELETE FROM yungst WHERE id > 5(
+SELECT * FROM (SELECT created_at FROM media 
+ORDER BY created_at DESC LIMIT 10 ) AS yungst )
+
+
+
+
+
+
+-- Хранимые процедуры и функции, триггеры  \
+
+-- Задание 1 Создайте хранимую функцию hello(), которая будет возвращать приветствие, в зависимости от текущего времени суток.
+-- С 6:00 до 12:00 функция должна возвращать фразу "Доброе утро",
+-- с 12:00 до 18:00 функция должна возвращать фразу "Добрый день",
+-- с 18:00 до 00:00 — "Добрый вечер", с 00:00 до 6:00 — "Доброй ночи"
+
+
+CREATE FUNCTION hello()
+RETURNS TEXT
+BEGIN
+   DECLARE hr INT ;
+   SET hr = HOUR(NOW()); -- та же проблема с созданием переменных
+   CASE hr
+     IF( hr >= 0 AND hr <= 5) THEN
+       RETURN "Доброй ночи" ;
+     IF( hr >= 6 AND hr <= 11) THEN
+       RETURN "Доброе утро" ;
+     IF( hr >= 12 AND hr <= 17) THEN
+       RETURN "Добрый день" ;
+     IF( hr >= 18 AND hr <= 0) THEN
+       RETURN "Добрый вечер" ;
+    END CASE;
+END //
+
+
+-- задание 2 В таблице products есть два текстовых поля: name с названием товара и description с его описанием.
+-- Допустимо присутствие обоих полей или одно из них. Ситуация,
+-- когда оба поля принимают неопределенное значение NULL неприемлема.
+-- Используя триггеры, добейтесь того, чтобы одно из этих полей или оба поля были заполнены.
+-- При попытке присвоить полям NULL-значение необходимо отменить операцию.
+
+
+CREATE TRIGGER check_product_name_insert BEFORE INSERT ON products
+FOR EACH ROW
+BEGIN
+  DECLARE prod_name VARCHAR(255);
+  SELECT id INTO prod.name FROM products ORDER BY id LIMIT 1;
+  SET NEW.name = COALESCE(NEW.name, prod_name);
+END//
+
+CREATE TRIGGER check_product_description_insert BEFORE INSERT ON products
+FOR EACH ROW
+BEGIN
+  DECLARE prod_description VARCHAR(255);
+  SELECT id INTO prod.description FROM products ORDER BY id LIMIT 1;
+  SET NEW.description = COALESCE(NEW.description, prod_description);
+END//
+
+
