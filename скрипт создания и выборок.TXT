@@ -1,0 +1,298 @@
+CREATE DATABASE kinopoisk ;
+
+USE kinopoisk;
+
+
+DROP TABLE IF EXISTS users;
+CREATE TABLE IF NOT EXISTS users (
+  id INT(10) UNSIGNED AUTO_INCREMENT NOT NULL ,
+  first_name VARCHAR(25) NOT NULL,
+  last_name VARCHAR(25) NOT NULL ,
+  email VARCHAR(100) NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP() ,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  PRIMARY KEY (id)
+  ) ENGINE=InnoDB ;
+  
+DROP TABLE IF EXISTS reviev;
+CREATE TABLE IF NOT EXISTS reviev (
+  id INT(10)  UNSIGNED AUTO_INCREMENT NOT NULL,
+  user_id INT(10)UNSIGNED NOT NULL,
+  body TEXT NOT NULL ,
+  film_id INT(10) UNSIGNED NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP() ,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  PRIMARY KEY (id)
+  ) ENGINE=InnoDB ;
+ 
+DROP TABLE IF EXISTS rating;
+CREATE TABLE IF NOT EXISTS rating (
+  id INT(10)  UNSIGNED AUTO_INCREMENT NOT NULL,
+  user_id INT(10)UNSIGNED NOT NULL,
+  rate INT (10) UNSIGNED NOT NULL,
+  film_id INT(10) UNSIGNED NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP() ,
+  PRIMARY KEY (id)
+  ) ENGINE=InnoDB ;
+
+DROP TABLE IF EXISTS coments;
+CREATE TABLE IF NOT EXISTS coments (
+  id INT(10)  UNSIGNED AUTO_INCREMENT NOT NULL,
+  user_id INT(10)UNSIGNED NOT NULL,
+  body TEXT NOT NULL ,
+  film_id INT(10) UNSIGNED NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP() ,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  PRIMARY KEY (id)
+  ) ENGINE=InnoDB ;
+ 
+DROP TABLE IF EXISTS friendship;
+CREATE TABLE IF NOT EXISTS friendship (
+  id INT(10)UNSIGNED AUTO_INCREMENT NOT NULL,
+  user_id INT(10) UNSIGNED NOT NULL ,
+  friend_id INT(10) UNSIGNED NOT NULL ,
+  status_id INT(10) UNSIGNED NOT NULL,
+  requested_at DATETIME DEFAULT CURRENT_TIMESTAMP() ,
+  confirmed_at DATETIME DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+  PRIMARY KEY (id)
+  ) ENGINE=InnoDB ; 
+
+DROP TABLE IF EXISTS friendship_status;
+CREATE TABLE IF NOT EXISTS friendship_status (
+  id INT(5)UNSIGNED AUTO_INCREMENT NOT NULL,
+  name VARCHAR(100)  NOT NULL ,
+  PRIMARY KEY (id)
+  ) ENGINE=InnoDB ; 
+
+DROP TABLE IF EXISTS profiles;
+CREATE TABLE IF NOT EXISTS profiles (
+  id INT(10)  UNSIGNED AUTO_INCREMENT NOT NULL,
+  sex VARCHAR(10),
+  birthday DATE NOT NULL ,
+  hometown VARCHAR(30) NOT NULL,
+  country VARCHAR(50) NOT NULL,
+  photo_id INT(10) UNSIGNED NOT NULL ,
+  PRIMARY KEY (id)
+  ) ENGINE=InnoDB ;
+
+DROP TABLE IF EXISTS film;
+CREATE TABLE IF NOT EXISTS film (
+  id INT(10)  UNSIGNED AUTO_INCREMENT NOT NULL,
+  film_name VARCHAR(50),
+  year_of_issue DATE NOT NULL ,
+  rating INT(10)UNSIGNED NOT NULL,
+  header TEXT NOT NULL,
+  film_genre INT (10) UNSIGNED NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP() ,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP() ,
+  PRIMARY KEY (id)
+  ) ENGINE=InnoDB ;
+
+DROP TABLE IF EXISTS film_genre;
+CREATE TABLE IF NOT EXISTS film_genre (
+  id INT(10)  UNSIGNED AUTO_INCREMENT NOT NULL,
+  genre_name VARCHAR(50),
+  PRIMARY KEY (id)
+  ) ENGINE=InnoDB ;
+
+DROP TABLE IF EXISTS news;
+CREATE TABLE IF NOT EXISTS news (
+  id INT(10)  UNSIGNED AUTO_INCREMENT NOT NULL,
+  header VARCHAR(50),
+  body TEXT NOT NULL  ,
+  media_id INT(10) UNSIGNED NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP() ,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP() ,
+  PRIMARY KEY (id)
+  ) ENGINE=InnoDB ;
+ 
+DROP TABLE IF EXISTS media;
+CREATE TABLE IF NOT EXISTS media (
+  id INT(10)  UNSIGNED AUTO_INCREMENT NOT NULL,
+  media_type_id INT(10) UNSIGNED NOT NULL,
+  file_name VARCHAR(50) NOT NULL ,
+  media_id INT(10)UNSIGNED  NOT NULL,
+  size INT (30) UNSIGNED NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP() ,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP() ,
+  PRIMARY KEY (id)
+  ) ENGINE=InnoDB ;
+
+DROP TABLE IF EXISTS media_type;
+CREATE TABLE IF NOT EXISTS media_type (
+  id INT(10)  UNSIGNED AUTO_INCREMENT NOT NULL,
+  file_name VARCHAR(50) NOT NULL ,
+  PRIMARY KEY (id)
+  ) ENGINE=InnoDB ;
+ 
+ 
+ 
+ALTER TABLE coments
+  ADD CONSTRAINT coments_user_id_fk 
+    FOREIGN KEY (user_id) REFERENCES users(id) 
+    ,
+  ADD CONSTRAINT coments_film_id_fk
+    FOREIGN KEY (film_id) REFERENCES film(id);
+   
+ALTER TABLE film DROP FOREIGN KEY film_film_genre_fk ;
+;    
+    
+ALTER TABLE film 
+  ADD CONSTRAINT film_film_genre_fk
+    FOREIGN KEY (film_genre) REFERENCES film_genre(id)
+;
+    
+ALTER TABLE friendship
+  ADD CONSTRAINT friendship_user_id_fk 
+    FOREIGN KEY (user_id) REFERENCES users(id)
+      ,
+  ADD CONSTRAINT friendship_friend_id_fk 
+    FOREIGN KEY (friend_id) REFERENCES users(id)
+      ,
+  ADD CONSTRAINT friendship_status_id_fk 
+    FOREIGN KEY (status_id) REFERENCES friendship_status(id)
+; 
+ALTER TABLE media  
+  ADD CONSTRAINT media_media_type_id_fk
+    FOREIGN KEY (media_type_id) REFERENCES media_type(id)    
+;
+
+ALTER TABLE news 
+  ADD CONSTRAINT news_media_id_fk
+    FOREIGN KEY (media_id) REFERENCES media(id)
+;
+
+ALTER TABLE profiles
+  ADD CONSTRAINT profiles_photo_id_fk
+    FOREIGN KEY (photo_id) REFERENCES media(id)
+;
+
+ALTER TABLE rating
+  ADD CONSTRAINT rating_user_id_fk
+    FOREIGN KEY (user_id) REFERENCES users(id)
+    ,
+  ADD CONSTRAINT rating_film_id_fk
+    FOREIGN KEY (film_id) REFERENCES film(id)
+
+;
+
+
+ALTER TABLE reviev
+  ADD CONSTRAINT reviev_user_id_fk
+    FOREIGN KEY (user_id) REFERENCES users(id)
+    ,
+  ADD CONSTRAINT reviev_film_id_fk
+    FOREIGN KEY (film_id) REFERENCES film(id)
+    
+;
+
+ALTER TABLE users
+  ADD CONSTRAINT users_id_fk 
+    FOREIGN KEY (id) REFERENCES profiles(id)
+    
+;
+
+
+CREATE UNIQUE INDEX reviev_created_at_uq ON reviev(created_at) ;
+
+CREATE UNIQUE INDEX film_year_of_issue_uq ON film(year_of_issue) ;
+
+CREATE UNIQUE INDEX users_email_uq ON users(email);
+
+CREATE UNIQUE INDEX users_created_at_uq ON users(created_at) ;
+
+CREATE UNIQUE INDEX profiles_county_uq ON profiles(country) ;
+
+CREATE UNIQUE INDEX profiles_hometown_uq ON profiles(hometown);
+
+CREATE UNIQUE INDEX profiles_birthday_uq ON profiles(birthday);
+
+
+SELECT film_id , COUNT(*) as rating_count  -- 10 фильмов которым больше всего пользователи ставили оценки 
+    FROM rating
+  GROUP BY film_id
+  ORDER BY rating_count DESC LIMIT 10 
+;
+
+
+
+
+SELECT country, COUNT(*) as country_count  -- в какой стране больше пользователей женского пола  
+  FROM profiles  
+    WHERE sex = 'f'
+GROUP BY country
+ORDER BY country_count DESC LIMIT 5 ;
+
+
+SElECT users.id, 
+  COUNT(rating.user_id) +
+  COUNT(reviev.user_id) +
+  COUNT(coments.user_id) AS activity
+  FROM users
+    LEFT JOIN rating 
+      ON users.id = rating.user_id
+    LEFT JOIN reviev
+      ON users.id = reviev.user_id
+    LEFT JOIN coments
+      ON users.id = coments.user_id
+  GROUP BY users.id
+  ORDER BY activity DESC LIMIT 10 ; -- 10 самых активных пользователей
+  
+
+SELECT * FROM users u2;
+
+SELECT users.id, first_name, last_name, COUNT(friendship.requested_at) AS total_friends , country
+  FROM users
+    LEFT JOIN friendship
+      ON (users.id = friendship.user_id
+        OR users.id = friendship.friend_id)
+        AND friendship.status_id = 1
+    LEFT JOIN profiles
+      ON users.id = profiles.id
+        WHERE sex = 'm' 
+  GROUP BY users.id
+  ORDER BY total_friends DESC; -- из какой страны пользователи мужчины с самым большим колличеством друзей 
+
+  
+SELECT * FROM user_full_info;  
+  
+DROP VIEW user_full_info;
+
+CREATE VIEW user_full_info AS -- информация о пользователе из двух таблиц users, profiles 
+    SELECT users.id, first_name, last_name ,
+    profiles.sex , profiles.hometown, profiles.birthday, profiles.country , email
+  FROM users , profiles 
+    WHERE users.id = profiles.id
+; 
+
+SELECT * FROM film_full_info ;
+
+CREATE VIEW film_full_info AS --  информация о фильмах из двух таблиц film, film_genre
+    SELECT film.id , film.year_of_issue , rating, header, film_genre.genre_name
+      FROM film , film_genre
+    WHERE film_genre = film_genre.id 
+ ;
+
+SELECT * FROM film ;
+
+
+
+CREATE TRIGGER insert_rating_average -- обновление средней рейтинга о фильме 
+AFTER INSERT ON rating
+FOR EACH ROW
+    UPDATE film.rating
+    SET averageRating = (SELECT AVG(rating.rate) FROM rating, film
+                         WHERE film.id = rating.film_id)
+    WHERE film.rating = NEW.film.rating;
+
+
+DELIMITER //
+   
+CREATE PROCEDURE del_young_coment (IN var_1 INT)
+  BEGIN
+DELETE FROM yungst WHERE id > var_1 (  -- даление N самых новых записей из таблицы сoments 
+SELECT * FROM (SELECT created_at FROM coments  
+ORDER BY created_at DESC LIMIT 10 ) AS yungst )
+  END //
+  
+  
